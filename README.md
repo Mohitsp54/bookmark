@@ -74,58 +74,10 @@ openssl rand -base64 32
 ### 5. Run Development Server
 
 ```bash
-npm run dev
+npm run start
 ```
 
 Visit [http://localhost:3000](http://localhost:3000)
-
-## Deployment to Vercel
-
-### 1. Push to GitHub
-
-```bash
-git init
-git add .
-git commit -m "Initial commit"
-git branch -M main
-git remote add origin your-repo-url
-git push -u origin main
-```
-
-### 2. Deploy on Vercel
-
-1. Go to [Vercel Dashboard](https://vercel.com/dashboard)
-2. Click "New Project"
-3. Import your GitHub repository
-4. Vercel will auto-detect Next.js settings
-
-### 3. Configure Environment Variables on Vercel
-
-In Vercel project settings → Environment Variables, add:
-
-- `SUPABASE_URL` - Your Supabase project URL
-- `SUPABASE_SERVICE_ROLE_KEY` - Your server-side service role key
-- `NEXTAUTH_URL` - Your production URL (e.g., `https://your-app.vercel.app`)
-- `NEXTAUTH_SECRET` - Same secret from local development
-- `GOOGLE_CLIENT_ID` - Your Google OAuth Client ID
-- `GOOGLE_CLIENT_SECRET` - Your Google OAuth Client Secret
-
-### 4. Update Google OAuth Redirect URI
-
-Add your production callback URL to Google Cloud Console:
-
-```
-https://your-app.vercel.app/api/auth/callback/google
-```
-
-### 5. Deploy
-
-Vercel will automatically deploy. After deployment:
-
-1. Visit your live URL
-2. Test Google OAuth login
-3. Add bookmarks
-4. Open multiple tabs to verify real-time sync
 
 ## Project Structure
 
@@ -170,15 +122,3 @@ d:/bookmark/
 - All API routes check authentication
 - Bookmarks filtered by `userId`
 - Users can only see and delete their own bookmarks
-
-## Troubleshooting
-
-**OAuth Error**: Make sure redirect URIs match exactly in Google Console
-
-**Database Error**: Verify `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`, and ensure required tables exist
-
-**Real-time not working**: Check browser console for errors, ensure SWR is polling
-
-## License
-
-MIT
