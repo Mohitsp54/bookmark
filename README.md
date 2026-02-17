@@ -1,36 +1,184 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Bookmark Manager
 
-## Getting Started
+A modern, real-time bookmark manager built with Next.js, featuring Google OAuth authentication and live updates across multiple tabs.
 
-First, run the development server:
+## Features
+
+- 🔐 **Google OAuth Authentication** - Secure login with Google (no email/password)
+- 📚 **Personal Bookmarks** - Each user has their own private bookmark collection
+- ⚡ **Real-time Updates** - Changes sync across all open tabs within 3 seconds
+- 🗑️ **Easy Management** - Add and delete bookmarks with a clean, modern UI
+- 🎨 **Premium Design** - Glassmorphism effects, gradients, and smooth animations
+- 📱 **Responsive** - Works beautifully on desktop and mobile
+
+## Tech Stack
+
+- **Next.js 14** (App Router)
+- **NextAuth.js v5** - Authentication
+- **Supabase Postgres** - PostgreSQL database
+- **SWR** - Real-time data fetching with polling
+- **Tailwind CSS** - Styling
+
+## Setup Instructions
+
+### 1. Clone and Install
+
+```bash
+cd d:/bookmark
+npm install
+```
+
+### 2. Set Up Google OAuth
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select existing one
+3. Enable Google+ API
+4. Go to "Credentials" → "Create Credentials" → "OAuth 2.0 Client ID"
+5. Configure OAuth consent screen
+6. Add authorized redirect URIs:
+   - Local: `http://localhost:3000/api/auth/callback/google`
+   - Production: `https://your-domain.vercel.app/api/auth/callback/google`
+7. Copy Client ID and Client Secret
+
+### 3. Configure Environment Variables
+
+Update `.env.local` with your credentials:
+
+```env
+# Supabase Postgres URLs
+SUPABASE_URL="https://your-project-ref.supabase.co"
+SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
+
+# NextAuth Configuration
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="generate-with-openssl-rand-base64-32"
+
+# Google OAuth Credentials
+GOOGLE_CLIENT_ID="your-google-client-id"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
+```
+
+Generate NEXTAUTH_SECRET:
+
+```bash
+openssl rand -base64 32
+```
+
+### 4. Set Up Database
+
+```bash
+# Create tables in Supabase SQL editor
+# (users, bookmarks)
+```
+
+### 5. Run Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Deployment to Vercel
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 1. Push to GitHub
 
-## Learn More
+```bash
+git init
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin your-repo-url
+git push -u origin main
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 2. Deploy on Vercel
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Go to [Vercel Dashboard](https://vercel.com/dashboard)
+2. Click "New Project"
+3. Import your GitHub repository
+4. Vercel will auto-detect Next.js settings
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 3. Configure Environment Variables on Vercel
 
-## Deploy on Vercel
+In Vercel project settings → Environment Variables, add:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `SUPABASE_URL` - Your Supabase project URL
+- `SUPABASE_SERVICE_ROLE_KEY` - Your server-side service role key
+- `NEXTAUTH_URL` - Your production URL (e.g., `https://your-app.vercel.app`)
+- `NEXTAUTH_SECRET` - Same secret from local development
+- `GOOGLE_CLIENT_ID` - Your Google OAuth Client ID
+- `GOOGLE_CLIENT_SECRET` - Your Google OAuth Client Secret
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 4. Update Google OAuth Redirect URI
+
+Add your production callback URL to Google Cloud Console:
+
+```
+https://your-app.vercel.app/api/auth/callback/google
+```
+
+### 5. Deploy
+
+Vercel will automatically deploy. After deployment:
+
+1. Visit your live URL
+2. Test Google OAuth login
+3. Add bookmarks
+4. Open multiple tabs to verify real-time sync
+
+## Project Structure
+
+```
+d:/bookmark/
+├── app/
+│   ├── api/
+│   │   ├── auth/[...nextauth]/route.js  # NextAuth handlers
+│   │   └── bookmarks/
+│   │       ├── route.js                  # GET, POST bookmarks
+│   │       └── [id]/route.js             # DELETE bookmark
+│   ├── globals.css                       # Global styles
+│   ├── layout.js                         # Root layout
+│   └── page.jsx                          # Main page
+├── components/
+│   ├── AddBookmarkForm.jsx               # Add bookmark form
+│   ├── BookmarkList.jsx                  # Bookmark list with SWR
+│   ├── Header.jsx                        # Header with user info
+│   └── LoginPage.jsx                     # Google OAuth login
+├── lib/
+│   └── auth.js                           # NextAuth configuration
+├── .env.local                            # Environment variables (local)
+└── package.json
+```
+
+## How It Works
+
+### Authentication
+
+- Users sign in with Google OAuth
+- NextAuth.js manages sessions
+- User data stored in Supabase Postgres
+
+### Real-time Updates
+
+- SWR polls `/api/bookmarks` every 3 seconds
+- When you add/delete a bookmark, all tabs refresh automatically
+- No WebSocket needed - simple and reliable
+
+### Privacy
+
+- All API routes check authentication
+- Bookmarks filtered by `userId`
+- Users can only see and delete their own bookmarks
+
+## Troubleshooting
+
+**OAuth Error**: Make sure redirect URIs match exactly in Google Console
+
+**Database Error**: Verify `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`, and ensure required tables exist
+
+**Real-time not working**: Check browser console for errors, ensure SWR is polling
+
+## License
+
+MIT
