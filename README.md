@@ -103,22 +103,21 @@ d:/bookmark/
 └── package.json
 ```
 
-## How It Works
+## Challenges & Solutions
 
-### Authentication
+During the development of this project, several technical hurdles were encountered and resolved:
 
-- Users sign in with Google OAuth
-- NextAuth.js manages sessions
-- User data stored in Supabase Postgres
+### 1. Database & Auth Synchronization
 
-### Real-time Updates
+**Problem**: Google OAuth provides user details, but we needed a persistent record in our own Supabase DB to link bookmarks to a unique `userId`.
+**Solution**: I implemented an `upsert` logic in the `signIn` callback in `lib/auth.js`. This ensures that every time a user logs in, their profile is either created or updated in our `users` table, and their unique DB ID is attached to the session.
 
-- SWR polls `/api/bookmarks` every 3 seconds
-- When you add/delete a bookmark, all tabs refresh automatically
-- No WebSocket needed - simple and reliable
+### 2. Real-time Feel without Complexity
 
-### Privacy
+**Problem**: I wanted the dashboard to update automatically across tabs without the overhead and complexity of setting up a WebSocket server or Supabase Realtime complexity.
+**Solution**: I utilized **SWR** (Stale-While-Revalidate) with a 3-second polling interval. This provides a "near real-time" experience that is highly reliable, handles offline states automatically, and requires zero backend infrastructure changes.
 
-- All API routes check authentication
-- Bookmarks filtered by `userId`
-- Users can only see and delete their own bookmarks
+### 3. API Security (Insecure Direct Object Reference)
+
+**Problem**: Dynamic routes like `api/bookmarks/[id]` could be vulnerable if a user tries to delete a bookmark by guessing another user's ID.
+**Solution**: Every sensitive API route performs a dual check. I don't just delete by ID; I verify that the `user_id` of the bookmark matches the `id` of the authenticated user in the current session before allowing any database modifications.
